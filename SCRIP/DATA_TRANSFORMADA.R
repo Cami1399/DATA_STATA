@@ -15,7 +15,7 @@ stats::fisher.test
 
 
 # importar data--------
-datos<-read.xlsx("DATA/DatosStata.xlsx")
+datos<-read.xlsx("DATA_STATA/DATA/DatosStata.xlsx")
 
 # explorando el objeto datos------
 str(datos)
