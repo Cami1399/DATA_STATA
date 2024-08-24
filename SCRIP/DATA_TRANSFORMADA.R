@@ -15,7 +15,7 @@ stats::fisher.test
 
 
 # importar data--------
-datos<-read.xlsx("DATA/DatosStata.xlsx")
+datos<-read.xlsx("DATA_STATA/DATA/DatosStata.xlsx")
 
 # explorando el objeto datos------
 str(datos)
@@ -190,11 +190,20 @@ DATA_Manipulada <- DATA %>%
     
     #Conversion de columnas a factor
     ADV_Gender= parse_factor(ADV_Gender,
+<<<<<<< HEAD:SCRIP/COERCION.R
                                          levels = c("M","F","M\nM","M\nM\nM","M\nF"),
                                          ordered = TRUE),
     BvD_Independence_Indicator= parse_factor(BvD_Independence_Indicator,
                                               levels = c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "U"),
                                               ordered = TRUE) )
   
+=======
+                             levels = c("M","F","M\nM","M\nM\nM","M\nF"),
+                             ordered = TRUE),
+    BvD_Independence_Indicator= parse_factor(BvD_Independence_Indicator,
+                                             levels = c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "U"),
+                                             ordered = TRUE) )
+
+>>>>>>> ea7a031a77ae16d341c247243c35e03cd18741f8:SCRIP/DATA_TRANSFORMADA.R
 str(DATA_Manipulada)
 sapply(DATA_Manipulada, class)
