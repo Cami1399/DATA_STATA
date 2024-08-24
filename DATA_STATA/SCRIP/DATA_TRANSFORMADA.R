@@ -15,13 +15,16 @@ stats::fisher.test
 
 
 # importar data--------
-datos<-read.xlsx("DATA/DatosStata.xlsx")
+datos<-read.xlsx("DATA_STATA/DATA/DatosStata.xlsx")
 
 # explorando el objeto datos------
 str(datos)
 names(DATA)
 
 datos_ex <-datos %>% select (- c(Número.de.accionistas,DM.Edad,ADV.Edad)) #eliminar duplicados
+datos_2 <-datos %>% select (- c(Número.de.accionistas,DM.Edad,ADV.Edad)) #eliminar duplicados
+
+
 # Diccionario de traducción
 DATA <- datos_ex %>%
   rename(
@@ -179,22 +182,77 @@ DATA_Manipulada <- DATA %>%
     OperatingRevenue_Employee = parse_number(OperatingRevenue_Employee, locale = locale(decimal_mark = ".")),
     Shareholder_Direct_Percentage = parse_number(Shareholder_Direct_Percentage, locale = locale(decimal_mark = ".")),
     Shareholder_Total_Percentage = parse_number(Shareholder_Total_Percentage, locale = locale(decimal_mark = ".")),
-    CSH_Direct_Percentage = parse_number(CSH_Direct_Percentage, locale = locale(decimal_mark = ".")),
-    
-    # Conversión de columnas a Date y character
+    CSH_Direct_Percentage = parse_number(CSH_Direct_Percentage, locale = locale(decimal_mark = ".")))
+
+
+DATA_Manipulada <- DATA %>%
+  mutate(    
+    # Conversión de columnas a Date 
     Incorporation_Date = as.Date(Incorporation_Date, origin = "1899-12-30"),
-    End_Date = as.Date(End_Date, origin = "1899-12-30"),
+    End_Date = as.Date(End_Date, origin = "1899-12-30"))
+
+
+DATA_Manipulada <- DATA %>%
+  mutate(
     # Conversión de columnas a character
     Country = as.character(Country),
     Identity = as.character(Identity),
+    Legal_Form = as.character(Legal_Form),
+    Legal_Form_Tabul = as.character(Legal_Form_Tabul))
     
+
+
+DATA_Manipulada <- DATA %>%
+  mutate(    
     #Conversion de columnas a factor
     ADV_Gender= parse_factor(ADV_Gender,
-                                         levels = c("M","F","M\nM","M\nM\nM","M\nF"),
-                                         ordered = TRUE),
+                             levels = c("M","F","M\nM","M\nM\nM","M\nF"),
+                             ordered = TRUE),
     BvD_Independence_Indicator= parse_factor(BvD_Independence_Indicator,
-                                              levels = c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "U"),
-                                              ordered = TRUE) )
-  
+                                             levels = c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "U"),
+                                             ordered = TRUE),
+    Standard_Legal_Form = parse_factor(Standard_Legal_Form,
+                                     levels = c("Public limited companies", "Private limited companies", "Partnerships", "Other legal forms"),
+                                     ordered = FALSE))
+
+
+
 str(DATA_Manipulada)
-sapply(DATA_Manipulada, class)
+sapply(DATA_Manipulada, class) #mostrara el nombre de las variables con los tipos de datos 
+
+
+
+#CREACION Y CALCYULO DE LAS VARIABLES FALTANTES
+
+DATA_Manipulada<- DATA_Manipulada %>%
+  mutate(Debt = Total_Liabilities / Total_Assets,
+            Oplnc= log(Operating_Revenue)) 
+
+#selección de variables(existentes en la DATA) a utilizar para la Tabla 1
+DATAM_SELECT <- DATA_Manipulada %>%
+  select(ROE, ROA, Ln_Total_Assets,Debt, Growth, GDP_Var, Inflation, Gender, Oplnc,
+         InventoryTurnover, Asset_Turnover, CollectionPeriod, 
+         Payment_Period, Age, Legal_Form, Country) %>%
+  rename(
+    Size = Ln_Total_Assets,
+    Growth = Growth,
+    VarGDP = GDP_Var,
+    Inflat = Inflation,
+    StockT = InventoryTurnover,
+    AssetT = Asset_Turnover,
+    ARP = CollectionPeriod,
+    APP = Payment_Period,
+    LForm = Legal_Form
+  )
+
+DATAM_SELECT <- DATAM_SELECT %>%
+  mutate(
+    # Conversión de columnas a character
+    Country = as.character(Country),
+    LForm = as.character(LForm))
+
+#FILTAR OBSERVACION SEGUN EL PAIS
+OB_ES<-DATAM_SELECT %>% filter(Country=="1") #ESPAÑA
+OB_IT<-DATAM_SELECT %>% filter(Country=="0") #ITALIA
+
+

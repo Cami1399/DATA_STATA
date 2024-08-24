@@ -124,10 +124,10 @@ DATA <- datos_ex %>%
     "DM_Also_a_Shareholder" = "DM.También.un.accionista",
     "DM_Position_Type" = "DM.Tipo.de.posición",
     "Number_of_Advisors" = "Número.de.asesores",
-    "Advisor_First_Name" = "ADV.Nombre",
-    "Advisor_Last_Name" = "ADV.Apellido",
-    "Advisor_Gender" = "ADV.Género",
-    "Advisor_Nationality_Country" = "ADV.País.de.nacionalidad",
+    "ADV_First_Name" = "ADV.Nombre",
+    "ADV_Last_Name" = "ADV.Apellido",
+    "ADV_Gender" = "ADV.Género",
+    "ADV_Nationality_Country" = "ADV.País.de.nacionalidad",
     "Nationality_Country" = "País.de.nacionalidad",
     "Number_of_Employees" = "Número.empleados",
     "BvD_Independence_Indicator" = "Indicador.independencia.BvD"
@@ -136,11 +136,11 @@ DATA <- datos_ex %>%
 
 colnames(DATA)
 str(DATA)
-trans_data <- DATA %>%
+DATA_Manipulada <- DATA %>%
   mutate(
     # Conversión de columnas a numérico
+    Growth = parse_number(Growth, locale = locale(decimal_mark = ".")),
     Ln_Inflation = parse_number(Ln_Inflation, locale = locale(decimal_mark = ".")),
-    NACE_Code = parse_number(NACE_Code, locale = locale(decimal_mark = ".")),
     Ln_Age = parse_number(Ln_Age, locale = locale(decimal_mark = ".")),
     Ln_Fixed_Assets = parse_number(Ln_Fixed_Assets, locale = locale(decimal_mark = ".")),
     Ln_Current_Assets = parse_number(Ln_Current_Assets, locale = locale(decimal_mark = ".")),
@@ -185,7 +185,16 @@ trans_data <- DATA %>%
     Incorporation_Date = as.Date(Incorporation_Date, origin = "1899-12-30"),
     End_Date = as.Date(End_Date, origin = "1899-12-30"),
     # Conversión de columnas a character
-    Country = as.character(Country)
-  )
-
-
+    Country = as.character(Country),
+    Identity = as.character(Identity),
+    
+    #Conversion de columnas a factor
+    ADV_Gender= parse_factor(ADV_Gender,
+                                         levels = c("M","F","M\nM","M\nM\nM","M\nF"),
+                                         ordered = TRUE),
+    BvD_Independence_Indicator= parse_factor(BvD_Independence_Indicator,
+                                              levels = c("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "U"),
+                                              ordered = TRUE) )
+  
+str(DATA_Manipulada)
+sapply(DATA_Manipulada, class)
