@@ -226,11 +226,11 @@ sapply(DATA_Manipulada, class) #mostrara el nombre de las variables con los tipo
 
 DATA_Manipulada<- DATA_Manipulada %>%
   mutate(Debt = Total_Liabilities / Total_Assets,
-         Oplnc= log(Operating_Revenue)) 
+         OpInc= log(Operating_Revenue)) 
 
 #selección de variables(existentes en la DATA) a utilizar para la Tabla 1
 DATAM_SELECT <- DATA_Manipulada %>%
-  select(ROE, ROA, Ln_Total_Assets,Debt, Growth, GDP_Var, Inflation, Gender, Oplnc,
+  select(ROE, ROA, Ln_Total_Assets,Debt, Growth, GDP_Var, Inflation, Gender, OpInc,
          InventoryTurnover, Asset_Turnover, CollectionPeriod, 
          Payment_Period, Age, Legal_Form, Country) %>%
   rename(
