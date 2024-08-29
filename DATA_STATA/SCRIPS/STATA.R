@@ -213,14 +213,21 @@ sapply(DATA_Manipulada, class) #mostrara el nombre de las variables con los tipo
 
 
 #CREACION Y CALCULO DE LAS VARIABLES FALTANTES
+<<<<<<< HEAD
 
+=======
+>>>>>>> f0be4ea8e09df9555feb0a97c602125e0d844d28
 DATA_Manipulada<- DATA_Manipulada %>%
   mutate(Debt = Total_Liabilities / Total_Assets,
          OpInc= log(Operating_Revenue),
          AssetT = Operating_Revenue / Total_Assets ,
+<<<<<<< HEAD
          StockT = Operating_Revenue / Inventory,
          Age = Seniority / 365 )%>% view()
 
+=======
+         StockT = Operating_Revenue / Inventory)
+>>>>>>> f0be4ea8e09df9555feb0a97c602125e0d844d28
 
 #selección de variables(existentes en la DATA) a utilizar para la Tabla 1
 DATAM_SELECT <- DATA_Manipulada %>%
@@ -243,6 +250,7 @@ DATA_SELECT <- DATAM_SELECT %>%
 
 
 #FILTAR OBSERVACION SEGUN EL PAIS
+<<<<<<< HEAD
 OB_ES<-DATA_SELECT %>% filter(Country=="1") #ESPAÑA
 OB_IT<-DATA_SELECT %>% filter(Country=="0") #ITALIA
 
@@ -256,3 +264,7 @@ GENERAL %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view
 ESPAÑA %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE ES")
 ITALIA %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE IT")
 
+=======
+OB_ES<-DATAM_SELECT %>% filter(Country=="1") #ESPAÑA
+OB_IT<-DATAM_SELECT %>% filter(Country=="0") #ITALIA
+>>>>>>> f0be4ea8e09df9555feb0a97c602125e0d844d28
