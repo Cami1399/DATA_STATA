@@ -246,7 +246,7 @@ DATA_SELECT <- DATAM_SELECT %>%
 OB_ES<-DATA_SELECT %>% filter(Country=="1") #ESPAÑA
 OB_IT<-DATA_SELECT %>% filter(Country=="0") #ITALIA
 
-GENERAL <- DATAM_SELECT %>% select (-c (Country, LForm))%>% view() 
+GENERAL <- DATA_SELECT %>% select (-c (Country, LForm))%>% view() 
 ESPAÑA <-OB_ES %>% select (-c (Country, LForm))%>% view() 
 ITALIA<- OB_IT %>% select (-c (Country, LForm))%>% view() 
 
