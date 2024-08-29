@@ -222,24 +222,22 @@ sapply(DATA_Manipulada, class) #mostrara el nombre de las variables con los tipo
 
 
 
-#CREACION Y CALCYULO DE LAS VARIABLES FALTANTES
-
+#CREACION Y CALCULO DE LAS VARIABLES FALTANTES
 DATA_Manipulada<- DATA_Manipulada %>%
   mutate(Debt = Total_Liabilities / Total_Assets,
-         OpInc= log(Operating_Revenue)) 
+         OpInc= log(Operating_Revenue),
+         AssetT = Operating_Revenue / Total_Assets ,
+         StockT = Operating_Revenue / Inventory)
 
 #selección de variables(existentes en la DATA) a utilizar para la Tabla 1
 DATAM_SELECT <- DATA_Manipulada %>%
   select(ROE, ROA, Ln_Total_Assets,Debt, Growth, GDP_Var, Inflation, Gender, OpInc,
-         InventoryTurnover, Asset_Turnover, CollectionPeriod, 
+         StockT, AssetT, CollectionPeriod, 
          Payment_Period, Age, Legal_Form, Country) %>%
   rename(
     Size = Ln_Total_Assets,
-    Growth = Growth,
     VarGDP = GDP_Var,
     Inflat = Inflation,
-    StockT = InventoryTurnover,
-    AssetT = Asset_Turnover,
     ARP = CollectionPeriod,
     APP = Payment_Period,
     LForm = Legal_Form
