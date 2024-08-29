@@ -3,6 +3,8 @@ install.packages("tidyverse")
 install.packages("openxlsx")
 install.packages("readr")
 install.packages("janitor")
+install.packages("rstatix")
+
 
 # cargar paquetes------
 library(tidyverse)
@@ -12,7 +14,7 @@ library(readr)
 library(janitor)
 stats::chisq.test
 stats::fisher.test
-
+library(rstatix)
 
 # importar data--------
 datos<-read.xlsx("DATA_STATA/DATA/DatosStata.xlsx")
@@ -22,7 +24,6 @@ str(datos)
 names(DATA)
 
 datos_ex <-datos %>% select (- c(Número.de.accionistas,DM.Edad,ADV.Edad)) #eliminar duplicados
-datos_2 <-datos %>% select (- c(Número.de.accionistas,DM.Edad,ADV.Edad)) #eliminar duplicados
 
 
 # Diccionario de traducción
@@ -50,8 +51,8 @@ DATA <- datos_ex %>%
     "Legal_Form" = "FormaJurídica",
     "Incorporation_Date" = "Fecha.de.constitución",
     "End_Date" = "Fecha.final",
-    "Age" = "Antigüedad",
-    "Ln_Age" = "LnAntigüedad",
+    "Seniority" = "Antigüedad",
+    "Ln_Seniority" = "LnAntigüedad",
     "Cash_Flows" = "Flujos.de.Caja",
     "Fixed_Assets" = "Activos.Fijos",
     "Current_Assets" = "Activos.Corrientes",
@@ -144,7 +145,7 @@ DATA_Manipulada <- DATA %>%
     # Conversión de columnas a numérico
     Growth = parse_number(Growth, locale = locale(decimal_mark = ".")),
     Ln_Inflation = parse_number(Ln_Inflation, locale = locale(decimal_mark = ".")),
-    Ln_Age = parse_number(Ln_Age, locale = locale(decimal_mark = ".")),
+    Ln_Seniority = parse_number(Ln_Seniority, locale = locale(decimal_mark = ".")),
     Ln_Fixed_Assets = parse_number(Ln_Fixed_Assets, locale = locale(decimal_mark = ".")),
     Ln_Current_Assets = parse_number(Ln_Current_Assets, locale = locale(decimal_mark = ".")),
     Ln_Inventory = parse_number(Ln_Inventory, locale = locale(decimal_mark = ".")),
@@ -182,29 +183,19 @@ DATA_Manipulada <- DATA %>%
     OperatingRevenue_Employee = parse_number(OperatingRevenue_Employee, locale = locale(decimal_mark = ".")),
     Shareholder_Direct_Percentage = parse_number(Shareholder_Direct_Percentage, locale = locale(decimal_mark = ".")),
     Shareholder_Total_Percentage = parse_number(Shareholder_Total_Percentage, locale = locale(decimal_mark = ".")),
-    CSH_Direct_Percentage = parse_number(CSH_Direct_Percentage, locale = locale(decimal_mark = ".")))
-
-
-DATA_Manipulada <- DATA %>%
-  mutate(    
+    CSH_Direct_Percentage = parse_number(CSH_Direct_Percentage, locale = locale(decimal_mark = ".")),
+ 
     # Conversión de columnas a Date 
     Incorporation_Date = as.Date(Incorporation_Date, origin = "1899-12-30"),
-    End_Date = as.Date(End_Date, origin = "1899-12-30"))
+    End_Date = as.Date(End_Date, origin = "1899-12-30"),
 
-
-DATA_Manipulada <- DATA %>%
-  mutate(
-    # Conversión de columnas a character
+   # Conversión de columnas a character
     Country = as.character(Country),
     Identity = as.character(Identity),
     Legal_Form = as.character(Legal_Form),
-    Legal_Form_Tabul = as.character(Legal_Form_Tabul))
-
-
-
-DATA_Manipulada <- DATA %>%
-  mutate(    
-    #Conversion de columnas a factor
+    Legal_Form_Tabul = as.character(Legal_Form_Tabul),
+   
+   #Conversion de columnas a factor
     ADV_Gender= parse_factor(ADV_Gender,
                              levels = c("M","F","M\nM","M\nM\nM","M\nF"),
                              ordered = TRUE),
@@ -216,41 +207,52 @@ DATA_Manipulada <- DATA %>%
                                        ordered = FALSE))
 
 
-
 str(DATA_Manipulada)
 sapply(DATA_Manipulada, class) #mostrara el nombre de las variables con los tipos de datos 
 
 
 
-#CREACION Y CALCYULO DE LAS VARIABLES FALTANTES
+#CREACION Y CALCULO DE LAS VARIABLES FALTANTES
 
 DATA_Manipulada<- DATA_Manipulada %>%
   mutate(Debt = Total_Liabilities / Total_Assets,
-         Oplnc= log(Operating_Revenue)) 
+         OpInc= log(Operating_Revenue),
+         AssetT = Operating_Revenue / Total_Assets ,
+         StockT = Operating_Revenue / Inventory,
+         Age = Seniority / 365 )%>% view()
+
 
 #selección de variables(existentes en la DATA) a utilizar para la Tabla 1
 DATAM_SELECT <- DATA_Manipulada %>%
-  select(ROE, ROA, Ln_Total_Assets,Debt, Growth, GDP_Var, Inflation, Gender, Oplnc,
-         InventoryTurnover, Asset_Turnover, CollectionPeriod, 
+  select(ROE, ROA, Ln_Total_Assets,Debt, Growth, GDP_Var, Inflation, Gender, OpInc,
+         StockT, AssetT, CollectionPeriod, 
          Payment_Period, Age, Legal_Form, Country) %>%
   rename(
     Size = Ln_Total_Assets,
-    Growth = Growth,
     VarGDP = GDP_Var,
     Inflat = Inflation,
-    StockT = InventoryTurnover,
-    AssetT = Asset_Turnover,
     ARP = CollectionPeriod,
     APP = Payment_Period,
     LForm = Legal_Form
   )
 
-DATAM_SELECT <- DATAM_SELECT %>%
-  mutate(
-    # Conversión de columnas a character
-    Country = as.character(Country),
-    LForm = as.character(LForm))
+#aplica a todas las columnas numéricas, redondeando los valores a dos decimales.
+DATA_SELECT <- DATAM_SELECT %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
+  view()
+
 
 #FILTAR OBSERVACION SEGUN EL PAIS
-OB_ES<-DATAM_SELECT %>% filter(Country=="1") #ESPAÑA
-OB_IT<-DATAM_SELECT %>% filter(Country=="0") #ITALIA
+OB_ES<-DATA_SELECT %>% filter(Country=="1") #ESPAÑA
+OB_IT<-DATA_SELECT %>% filter(Country=="0") #ITALIA
+
+GENERAL <- DATAM_SELECT %>% select (-c (Country, LForm))%>% view() 
+ESPAÑA <-OB_ES %>% select (-c (Country, LForm))%>% view() 
+ITALIA<- OB_IT %>% select (-c (Country, LForm))%>% view() 
+
+
+#RESUMENES ESTADISTICO POR CRITERIOS (GENERAL, ESPAÑA, ITALIA)
+GENERAL %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE G")
+ESPAÑA %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE ES")
+ITALIA %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE IT")
+
