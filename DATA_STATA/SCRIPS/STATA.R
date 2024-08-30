@@ -255,3 +255,33 @@ ITALIA<- OB_IT %>% select (-c (Country, LForm))%>% view()
 GENERAL %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE G")
 ESPAÑA %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE ES")
 ITALIA %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE IT")
+
+#FORMA 2 
+
+# obtener el resumen estadístico (EXCLUYENFO VALORES NO DESADOS INF)
+# se convirtio a NA los valores INF, para que no interfieran en el resumen estadistico 
+G <- GENERAL %>%
+  mutate(across(everything(), ~ ifelse(is.infinite(.), NA, .)))
+RE_G<- G %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RG")
+
+E <- ESPAÑA %>%
+  mutate(across(everything(), ~ ifelse(is.infinite(.), NA, .)))
+RE_E <- E %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RE")
+
+I <- ITALIA %>%
+  mutate(across(everything(), ~ ifelse(is.infinite(.), NA, .)))
+RE_I<- I %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% view("RI")
+
+RE_UNIDO_ES_IT <- full_join(RE_E, RE_I, by = "variable") %>% view()
+
+
+#TABLA 3
+
+LF_GENERAL <- DATA_SELECT %>% count(LForm) %>% view()
+LF_ESPAÑA<- OB_ES %>% count(LForm) %>% view()
+LF_ITALIA<- OB_IT %>% count(LForm) %>% view()
+LF_UNIDO <- full_join(LF_ESPAÑA, LF_ITALIA, by = "LForm") %>% view()
+
+DATA_Manipulada %>% count(Standard_Legal_Form) %>%  view() # ESTE ES TOMANDO EN VEZ DE LOS ID LOS NOMBRES DE LAS COMPAÑIAS, QUE ES UN FACTOR(este me gusta mas :)
+
+
