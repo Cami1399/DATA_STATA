@@ -275,13 +275,29 @@ RE_I<- I %>% get_summary_stats() %>% select(variable, mean, sd, min, max)%>% vie
 RE_UNIDO_ES_IT <- full_join(RE_E, RE_I, by = "variable") %>% view()
 
 
+
 #TABLA 3
 
-LF_GENERAL <- DATA_SELECT %>% count(LForm) %>% view()
-LF_ESPAÑA<- OB_ES %>% count(LForm) %>% view()
-LF_ITALIA<- OB_IT %>% count(LForm) %>% view()
-LF_UNIDO <- full_join(LF_ESPAÑA, LF_ITALIA, by = "LForm") %>% view()
+LF_GENERAL <- DATA_SELECT %>% count(LForm) %>% rename("Total sample" = n)%>% view("LF_GENERAL") 
+LF_ESPAÑA<- OB_ES %>% count(LForm) %>% rename(Spain = n) %>% view("LF_ESPAÑA")
+LF_ITALIA<- OB_IT %>% count(LForm) %>% rename(Italy = n)%>% view("LF_ITALIA")
 
-DATA_Manipulada %>% count(Standard_Legal_Form) %>%  view() # ESTE ES TOMANDO EN VEZ DE LOS ID LOS NOMBRES DE LAS COMPAÑIAS, QUE ES UN FACTOR(este me gusta mas :)
+# Unir las tablas por 'LForm' (el tipo de empresa)
+T_LEGAL_FORM <- LF_GENERAL %>%
+  full_join(LF_ESPAÑA, by = "LForm") %>%
+  full_join(LF_ITALIA, by = "LForm")  %>% view()
+# Rellenar con ceros en caso de valores faltantes
+T_LEGAL_FORM[is.na(T_LEGAL_FORM)] <- 0
 
+DATA_Manipulada %>% distinct(Standard_Legal_Form)
+tipo_empresa <- c("0" = "Public limited company", 
+                  "1" = "Private limited company", 
+                  "3" = "Cooperative", 
+                  "4" = "Other legal forms")
+# Reemplazar los códigos numéricos con los nombres de tipos de empresas
+T_LEGAL_FORM <-T_LEGAL_FORM %>%
+  mutate(LForm = tipo_empresa[as.character(LForm)])%>% 
+  rename("Legal form" = LForm)
+
+View(T_LEGAL_FORM)
 
